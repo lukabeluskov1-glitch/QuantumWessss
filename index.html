@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Announce</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;800&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0c0c0e;
+      --surface: #141416;
+      --border: #222226;
+      --accent: #e8ff47;
+      --text: #f0f0f0;
+      --muted: #555560;
+      --danger: #ff4d4d;
+      --success: #47ff8a;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 540px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 28px 32px 24px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .card-header h1 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 22px;
+      letter-spacing: -0.5px;
+      color: var(--accent);
+    }
+
+    .card-header p {
+      margin-top: 6px;
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 0.02em;
+    }
+
+    .card-body {
+      padding: 28px 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    label {
+      display: block;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    textarea {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      font-size: 14px;
+      line-height: 1.6;
+      padding: 14px 16px;
+      resize: none;
+      height: 120px;
+      transition: border-color 0.15s;
+      outline: none;
+    }
+
+    textarea:focus {
+      border-color: var(--accent);
+    }
+
+    textarea::placeholder { color: var(--muted); }
+
+    .image-upload {
+      width: 100%;
+      background: var(--bg);
+      border: 1px dashed var(--border);
+      border-radius: 3px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+      position: relative;
+    }
+
+    .image-upload:hover {
+      border-color: var(--accent);
+      background: #0f0f11;
+    }
+
+    .image-upload input {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+
+    .image-upload-text {
+      font-size: 12px;
+      color: var(--muted);
+      pointer-events: none;
+    }
+
+    .image-upload-text span {
+      color: var(--accent);
+    }
+
+    #preview-wrap {
+      display: none;
+      position: relative;
+    }
+
+    #preview-wrap img {
+      width: 100%;
+      max-height: 200px;
+      object-fit: cover;
+      border-radius: 3px;
+      border: 1px solid var(--border);
+      display: block;
+    }
+
+    #remove-img {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: rgba(0,0,0,0.7);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 2px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    #remove-img:hover { background: var(--danger); border-color: var(--danger); }
+
+    .send-btn {
+      width: 100%;
+      background: var(--accent);
+      color: #0c0c0e;
+      border: none;
+      border-radius: 3px;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+      letter-spacing: 0.05em;
+      padding: 16px;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+
+    .send-btn:hover { opacity: 0.88; }
+    .send-btn:active { transform: scale(0.99); }
+    .send-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    .status {
+      font-size: 12px;
+      text-align: center;
+      padding: 10px;
+      border-radius: 3px;
+      display: none;
+    }
+
+    .status.success {
+      display: block;
+      background: rgba(71, 255, 138, 0.08);
+      border: 1px solid rgba(71, 255, 138, 0.2);
+      color: var(--success);
+    }
+
+    .status.error {
+      display: block;
+      background: rgba(255, 77, 77, 0.08);
+      border: 1px solid rgba(255, 77, 77, 0.2);
+      color: var(--danger);
+    }
+
+    .char-count {
+      font-size: 11px;
+      color: var(--muted);
+      text-align: right;
+      margin-top: -12px;
+    }
+
+    .char-count.warn { color: var(--danger); }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <div class="card-header">
+    <h1>Announce</h1>
+    <p>Posts directly to your Discord server</p>
+  </div>
+  <div class="card-body">
+
+    <div>
+      <label>Message</label>
+      <textarea id="msg" placeholder="Type your announcement..." maxlength="2000"></textarea>
+      <div class="char-count" id="char-count">0 / 2000</div>
+    </div>
+
+    <div>
+      <label>Image (optional)</label>
+      <div id="preview-wrap">
+        <img id="preview-img" src="" alt="preview"/>
+        <button id="remove-img" onclick="removeImage()">Remove</button>
+      </div>
+      <div class="image-upload" id="upload-box">
+        <input type="file" id="img-input" accept="image/*" onchange="handleImage(event)"/>
+        <div class="image-upload-text">Click or drag — <span>attach image</span></div>
+      </div>
+    </div>
+
+    <button class="send-btn" id="send-btn" onclick="sendAnnouncement()">Send Announcement</button>
+
+    <div class="status" id="status"></div>
+
+  </div>
+</div>
+
+<script>
+  const textarea = document.getElementById('msg');
+  const charCount = document.getElementById('char-count');
+
+  textarea.addEventListener('input', () => {
+    const len = textarea.value.length;
+    charCount.textContent = `${len} / 2000`;
+    charCount.classList.toggle('warn', len > 1800);
+  });
+
+  let imageBase64 = null;
+  let imageMimeType = null;
+
+  function handleImage(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      imageBase64 = ev.target.result.split(',')[1];
+      imageMimeType = file.type;
+      document.getElementById('preview-img').src = ev.target.result;
+      document.getElementById('preview-wrap').style.display = 'block';
+      document.getElementById('upload-box').style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function removeImage() {
+    imageBase64 = null;
+    imageMimeType = null;
+    document.getElementById('preview-wrap').style.display = 'none';
+    document.getElementById('upload-box').style.display = 'block';
+    document.getElementById('img-input').value = '';
+  }
+
+  async function sendAnnouncement() {
+    const message = textarea.value.trim();
+    const status = document.getElementById('status');
+    const btn = document.getElementById('send-btn');
+
+    if (!message) {
+      showStatus('error', 'Please type a message first.');
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Sending...';
+    status.className = 'status';
+    status.style.display = 'none';
+
+    try {
+      const res = await fetch('/announce', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message,
+          image: imageBase64 || null,
+          mimeType: imageMimeType || null,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        showStatus('success', 'Announcement sent to Discord.');
+        textarea.value = '';
+        charCount.textContent = '0 / 2000';
+        removeImage();
+      } else {
+        showStatus('error', data.error || 'Something went wrong.');
+      }
+    } catch (err) {
+      showStatus('error', 'Could not reach the server.');
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'Send Announcement';
+  }
+
+  function showStatus(type, msg) {
+    const el = document.getElementById('status');
+    el.className = `status ${type}`;
+    el.textContent = msg;
+  }
+</script>
+
+</body>
+</html>
